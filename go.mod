@@ -1,4 +1,4 @@
-module github.com/itsdalmo/gotemplate
+module github.com/telia-oss/aws-auth
 
 go 1.14
 

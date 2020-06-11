@@ -1,4 +1,4 @@
-package gotemplate
+package auth
 
 import (
 	"fmt"

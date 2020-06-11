@@ -3,16 +3,16 @@ before:
     - go mod download
 
 builds:
-- main: ./cmd/gotemplate/main.go
-  env:
-    - CGO_ENABLED=0
-  goos:
-    - darwin
-    - linux
-    - windows
-  goarch:
-    - amd64
-  ldflags: -buildid="" -s -w
+  - main: ./cmd/aws-auth/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+    ldflags: -buildid="" -s -w
 
 archives:
   - format_overrides:
@@ -38,10 +38,10 @@ release:
 
 brews:
   - github:
-      owner: itsdalmo
+      owner: telia-oss
       name: homebrew-tap
     folder: Formula
-    homepage: https://github.com/itsdalmo/gotemplate
-    description: Template for go project and tap.
+    homepage: https://github.com/telia-oss/aws-auth
+    description: CLI for authenticating against AWS
     test: |
-      system "#{bin}/gotemplate --version"
+      system "#{bin}/aws-auth --version"

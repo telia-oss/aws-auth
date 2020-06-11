@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/itsdalmo/gotemplate/internal/cli"
+	"github.com/telia-oss/aws-auth/internal/cli"
 )
 
 func TestCLI(t *testing.T) {
@@ -29,9 +29,9 @@ there
 			description: "help message",
 			command:     []string{"--help"},
 			expected: strings.TrimSpace(`
-usage: gotemplate [<flags>] [<message>...]
+usage: aws-auth [<flags>] [<message>...]
 
-Template for go CLIs
+CLI for authenticating against AWS
 
 Flags:
   --help     Show context-sensitive help (also try --help-long and --help-man).

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/itsdalmo/gotemplate/internal/cli"
+	"github.com/telia-oss/aws-auth/internal/cli"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 )
