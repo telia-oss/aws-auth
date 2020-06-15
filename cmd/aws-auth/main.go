@@ -11,6 +11,6 @@ import (
 var version = "dev"
 
 func main() {
-	app := cli.New(os.Stdout).Version(version)
+	app := cli.New(&cli.Options{Writer: os.Stdout}).Version(version)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 }
