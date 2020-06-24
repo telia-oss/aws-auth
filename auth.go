@@ -25,20 +25,11 @@ const (
 	awsFederationEndpoint = "https://signin.aws.amazon.com/federation"
 )
 
-// CredentialProcessOutput ...
-type CredentialProcessOutput struct {
-	Version         int    `json:"Version"`
-	AccessKeyID     string `json:"AccessKeyId"`
-	SecretAccessKey string `json:"SecretAccessKey"`
-	SessionToken    string `json:"SessionToken"`
-	Expiration      string `json:"Expiration"`
-}
-
 // GetCredentials ...
-func GetCredentials(configPath, profileName string, store keyring.Keyring) (*CredentialProcessOutput, error) {
+func GetCredentials(configPath, profileName string, store keyring.Keyring) (aws.Credentials, error) {
 	profile, err := GetAWSConfigProfile(configPath, profileName)
 	if err != nil {
-		return nil, err
+		return aws.Credentials{}, err
 	}
 
 	var provider aws.CredentialsProvider
@@ -56,21 +47,9 @@ func GetCredentials(configPath, profileName string, store keyring.Keyring) (*Cre
 			RotationWindow: 30 * time.Minute,
 		}
 	default:
-		return nil, fmt.Errorf("unknown type for profile: %s", profileName)
+		return aws.Credentials{}, fmt.Errorf("unknown type for profile: %s", profileName)
 	}
-
-	creds, err := provider.Retrieve(context.TODO())
-	if err != nil {
-		return nil, err
-	}
-
-	return &CredentialProcessOutput{
-		Version:         1,
-		AccessKeyID:     creds.AccessKeyID,
-		SecretAccessKey: creds.SecretAccessKey,
-		SessionToken:    creds.SessionToken,
-		Expiration:      creds.Expires.Format(time.RFC3339),
-	}, nil
+	return provider.Retrieve(context.TODO())
 }
 
 // Exec a command using the specified AWSProfile.

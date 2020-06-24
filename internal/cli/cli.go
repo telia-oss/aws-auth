@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	awsauth "github.com/telia-oss/aws-auth"
 
@@ -26,7 +27,7 @@ func New(opts *Options) *kingpin.Application {
 
 	var (
 		configPath   = app.Flag("config", "Path to the config file where the AWS profiles are defined").Default(external.DefaultSharedConfigFilename()).String()
-		get          = app.Command("get", "Get new credentials for the specified AWS profile")
+		get          = app.Command("get", "Get credentials for the specified AWS profile")
 		getProfile   = get.Arg("profile", "Profile to target").Required().String()
 		login        = app.Command("login", "Login to the AWS Console")
 		loginProfile = login.Arg("profile", "Profile to use when creating the AWS Credentials").Required().String()
@@ -51,7 +52,20 @@ func New(opts *Options) *kingpin.Application {
 		if err != nil {
 			return err
 		}
-		return json.NewEncoder(opts.Writer).Encode(creds)
+		output := struct {
+			Version         int    `json:"Version"`
+			AccessKeyID     string `json:"AccessKeyId"`
+			SecretAccessKey string `json:"SecretAccessKey"`
+			SessionToken    string `json:"SessionToken"`
+			Expiration      string `json:"Expiration"`
+		}{
+			Version:         1,
+			AccessKeyID:     creds.AccessKeyID,
+			SecretAccessKey: creds.SecretAccessKey,
+			SessionToken:    creds.SessionToken,
+			Expiration:      creds.Expires.Format(time.RFC3339),
+		}
+		return json.NewEncoder(opts.Writer).Encode(output)
 	})
 
 	exec.Action(func(_ *kingpin.ParseContext) error {
@@ -71,6 +85,6 @@ func fileKeyringPassphrasePrompt(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Fprintf(os.Stderr, "\n\n")
+	fmt.Fprintf(os.Stderr, "\n")
 	return string(b), nil
 }
