@@ -53,13 +53,19 @@ func GetCredentials(configPath, profileName string, store keyring.Keyring) (aws.
 }
 
 // Exec a command using the specified AWSProfile.
-func Exec(configPath, profileName string, args []string) error {
+func Exec(configPath, profileName string, store keyring.Keyring, args []string) error {
 	c, err := external.LoadDefaultAWSConfig(
 		external.WithSharedConfigFiles([]string{configPath}),
 		external.WithSharedConfigProfile(profileName),
 	)
 	if err != nil {
 		return fmt.Errorf("load config: %s", err)
+	}
+	c.Credentials = &CacheProvider{
+		Provider:       c.Credentials,
+		ProfileName:    profileName,
+		Store:          store,
+		RotationWindow: 30 * time.Minute,
 	}
 
 	creds, err := c.Credentials.Retrieve(context.TODO())
@@ -99,13 +105,19 @@ func newCommand(args []string, envmap map[string]string) *exec.Cmd {
 }
 
 // Login to the AWS Console using credentials for the specified AWSProfile.
-func Login(configPath, profileName string) error {
+func Login(configPath, profileName string, store keyring.Keyring) error {
 	c, err := external.LoadDefaultAWSConfig(
 		external.WithSharedConfigFiles([]string{configPath}),
 		external.WithSharedConfigProfile(profileName),
 	)
 	if err != nil {
 		return fmt.Errorf("load config: %s", err)
+	}
+	c.Credentials = &CacheProvider{
+		Provider:       c.Credentials,
+		ProfileName:    profileName,
+		Store:          store,
+		RotationWindow: 30 * time.Minute,
 	}
 
 	creds, err := c.Credentials.Retrieve(context.TODO())

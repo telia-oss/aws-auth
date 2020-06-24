@@ -37,10 +37,15 @@ func New(opts *Options) *kingpin.Application {
 	)
 
 	keyringConfig := keyring.Config{
-		ServiceName:      "aws-auth",
-		AllowedBackends:  []keyring.BackendType{keyring.BackendType("file")},
-		FileDir:          "~/.aws-auth/keys/",
-		FilePasswordFunc: fileKeyringPassphrasePrompt,
+		ServiceName:              "aws-auth",
+		FileDir:                  "~/.aws-auth/keys/",
+		FilePasswordFunc:         fileKeyringPassphrasePrompt,
+		LibSecretCollectionName:  "aws-auth",
+		KWalletAppID:             "aws-auth",
+		KWalletFolder:            "aws-auth",
+		WinCredPrefix:            "aws-auth",
+		KeychainName:             "aws-auth",
+		KeychainTrustApplication: true,
 	}
 
 	get.Action(func(_ *kingpin.ParseContext) error {
@@ -69,11 +74,19 @@ func New(opts *Options) *kingpin.Application {
 	})
 
 	exec.Action(func(_ *kingpin.ParseContext) error {
-		return awsauth.Exec(*configPath, *execProfile, *execCommand)
+		keyring, err := keyring.Open(keyringConfig)
+		if err != nil {
+			return err
+		}
+		return awsauth.Exec(*configPath, *execProfile, keyring, *execCommand)
 	})
 
 	login.Action(func(_ *kingpin.ParseContext) error {
-		return awsauth.Login(*configPath, *loginProfile)
+		keyring, err := keyring.Open(keyringConfig)
+		if err != nil {
+			return err
+		}
+		return awsauth.Login(*configPath, *loginProfile, keyring)
 	})
 
 	return app
